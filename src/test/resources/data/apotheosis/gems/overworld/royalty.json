@@ -120,7 +120,7 @@
       "gem_class": {
         "key": "ring",
         "types": [
-          "ring"
+          "curios:ring"
         ]
       },
       "operation": "multiply_total",

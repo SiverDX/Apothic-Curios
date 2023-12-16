@@ -2,7 +2,6 @@ package daripher.apothiccurios;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.mojang.datafixers.util.Either;
-import daripher.apothiccurios.config.Config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -18,9 +17,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import shadows.apotheosis.Apotheosis;
 import shadows.apotheosis.adventure.affix.AffixHelper;
 import shadows.apotheosis.adventure.affix.AffixInstance;
@@ -47,7 +44,6 @@ public class ApothicCuriosMod {
     forgeEventBus.addListener(this::applyCurioDamageAffixes);
     forgeEventBus.addListener(EventPriority.LOWEST, this::removeFakeCurioAttributes);
     forgeEventBus.addListener(EventPriority.LOWEST, this::removeGemAttributeTooltips);
-    ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
   }
 
   private void addCurioSocketTooltip(RenderTooltipEvent.GatherComponents event) {
@@ -118,11 +114,12 @@ public class ApothicCuriosMod {
     event.getToolTip().removeIf(c -> c.getString().equals(tooltip.getString()));
   }
 
-  public static void registerCurioLootCategory(String identifier) {
-    SlotContext slotContext = new SlotContext(identifier, null, 0, false, false);
+  public static void registerCurioLootCategory(String id) {
+    String slotId = id.replace("curios:", "");
+    SlotContext slotContext = new SlotContext(slotId, null, 0, false, false);
     Predicate<ItemStack> validator = s -> CuriosApi.getCuriosHelper().isStackValid(slotContext, s);
     EquipmentSlot[] fakeSlots = {FAKE_SLOT};
-    LootCategory.register(null, identifier, validator, fakeSlots);
+    LootCategory.register(null, id, validator, fakeSlots);
   }
 
   private boolean adventureModuleEnabled() {

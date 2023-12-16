@@ -69,7 +69,7 @@
       "gem_class": {
         "key": "ring",
         "types": [
-          "ring"
+          "curios:ring"
         ]
       },
       "attribute": "apotheosis:cold_damage",
