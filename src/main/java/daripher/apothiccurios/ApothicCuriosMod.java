@@ -2,6 +2,15 @@ package daripher.apothiccurios;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.mojang.datafixers.util.Either;
+import dev.shadowsoffire.apotheosis.Apotheosis;
+import dev.shadowsoffire.apotheosis.adventure.affix.AffixHelper;
+import dev.shadowsoffire.apotheosis.adventure.affix.AffixInstance;
+import dev.shadowsoffire.apotheosis.adventure.affix.socket.SocketHelper;
+import dev.shadowsoffire.apotheosis.adventure.affix.socket.gem.GemInstance;
+import dev.shadowsoffire.apotheosis.adventure.client.SocketTooltipRenderer;
+import dev.shadowsoffire.apotheosis.adventure.loot.LootCategory;
+import dev.shadowsoffire.attributeslib.AttributesLib;
+import dev.shadowsoffire.attributeslib.api.IFormattableAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -18,18 +27,10 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import shadows.apotheosis.Apotheosis;
-import shadows.apotheosis.adventure.affix.AffixHelper;
-import shadows.apotheosis.adventure.affix.AffixInstance;
-import shadows.apotheosis.adventure.affix.socket.SocketHelper;
-import shadows.apotheosis.adventure.affix.socket.gem.GemInstance;
-import shadows.apotheosis.adventure.client.SocketTooltipRenderer;
-import shadows.apotheosis.adventure.loot.LootCategory;
-import shadows.apotheosis.core.attributeslib.AttributesLib;
-import shadows.apotheosis.core.attributeslib.api.IFormattableAttribute;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.event.CurioAttributeModifierEvent;
+import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
 @Mod(ApothicCuriosMod.MOD_ID)
 public class ApothicCuriosMod {
@@ -64,7 +65,8 @@ public class ApothicCuriosMod {
   private void applyCurioAttributeAffixes(CurioAttributeModifierEvent event) {
     ItemStack stack = event.getItemStack();
     if (!stack.hasTag()) return;
-    if (!CuriosApi.getCuriosHelper().isStackValid(event.getSlotContext(), stack)) return;
+    //noinspection ConstantValue
+    if (!CuriosApi.isStackValid(event.getSlotContext(), stack)) return;
     AffixHelper.getAffixes(stack).forEach((a, i) -> i.addModifiers(FAKE_SLOT, event::addModifier));
   }
 
@@ -96,17 +98,18 @@ public class ApothicCuriosMod {
 
   private void removeTooltip(ItemTooltipEvent event, GemInstance gem, ItemStack stack) {
     gem.gem()
+        .get()
         .getBonus(LootCategory.forItem(stack))
         .ifPresent(
             b -> {
               b.addModifiers(
                   gem.gemStack(),
-                  gem.rarity(),
+                  gem.rarity().get(),
                   (a, m) ->
                       removeTooltip(
                           event,
                           IFormattableAttribute.toComponent(a, m, AttributesLib.getTooltipFlag())));
-              removeTooltip(event, b.getSocketBonusTooltip(gem.gemStack(), gem.rarity()));
+              removeTooltip(event, b.getSocketBonusTooltip(gem.gemStack(), gem.rarity().get()));
             });
   }
 
@@ -117,7 +120,7 @@ public class ApothicCuriosMod {
   public static void registerCurioLootCategory(String id) {
     String slotId = id.replace("curios:", "");
     SlotContext slotContext = new SlotContext(slotId, null, 0, false, false);
-    Predicate<ItemStack> validator = s -> CuriosApi.getCuriosHelper().isStackValid(slotContext, s);
+    Predicate<ItemStack> validator = s -> CuriosApi.isStackValid(slotContext, s);
     EquipmentSlot[] fakeSlots = {FAKE_SLOT};
     LootCategory.register(null, id, validator, fakeSlots);
   }
@@ -127,13 +130,13 @@ public class ApothicCuriosMod {
   }
 
   private static boolean isNonCurio(ItemStack stack) {
-    return CuriosApi.getCuriosHelper().getCurioTags(stack.getItem()).isEmpty();
+    return CuriosApi.getItemStackSlots(stack).isEmpty();
   }
 
   public static List<ItemStack> getEquippedCurios(LivingEntity entity) {
     List<ItemStack> curios = new ArrayList<>();
-    CuriosApi.getCuriosHelper()
-        .getEquippedCurios(entity)
+    CuriosApi.getCuriosInventory(entity)
+        .map(ICuriosItemHandler::getEquippedCurios)
         .ifPresent(
             i -> {
               for (int slot = 0; slot < i.getSlots(); slot++) {

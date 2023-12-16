@@ -4,34 +4,32 @@
   "quality": 0,
   "dimensions": [
   ],
-  "bonuses": [
-    {
-      "type": "apotheosis:attribute",
-      "gem_class": {
-        "key": "light_weapon",
-        "types": [
-          "sword",
-          "trident"
-        ]
-      },
-      "attribute": "apotheosis:cold_damage",
-      "operation": "ADDITION",
-      "values": {
-        "common": 1,
-        "uncommon": 1.5,
-        "rare": 2.5,
-        "epic": 4,
-        "mythic": 6,
-        "ancient": 8
-      }
+  "bonuses": [{
+    "type": "apotheosis:attribute",
+    "gem_class": {
+      "key": "light_weapon",
+      "types": [
+        "sword",
+        "trident"
+      ]
     },
+    "attribute": "attributeslib:cold_damage",
+    "operation": "ADDITION",
+    "values": {
+      "common": 1,
+      "uncommon": 1.5,
+      "rare": 2.5,
+      "epic": 4,
+      "mythic": 6,
+      "ancient": 8
+    }
+  },
     {
       "type": "apotheosis:attribute",
       "gem_class": {
         "key": "core_armor",
         "types": [
-          "chestplate",
-          "leggings"
+          "chestplate", "leggings"
         ]
       },
       "attribute": "forge:entity_gravity",
@@ -72,7 +70,7 @@
           "curios:ring"
         ]
       },
-      "attribute": "apotheosis:cold_damage",
+      "attribute": "attributeslib:cold_damage",
       "operation": "ADDITION",
       "values": {
         "common": 0.05,
