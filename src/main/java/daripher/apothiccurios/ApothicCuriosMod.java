@@ -10,6 +10,7 @@ import dev.shadowsoffire.apotheosis.adventure.affix.socket.gem.GemInstance;
 import dev.shadowsoffire.apotheosis.adventure.affix.socket.gem.bonus.GemBonus;
 import dev.shadowsoffire.apotheosis.adventure.client.SocketTooltipRenderer;
 import dev.shadowsoffire.apotheosis.adventure.loot.LootCategory;
+import dev.shadowsoffire.apotheosis.adventure.loot.LootRarity;
 import dev.shadowsoffire.attributeslib.AttributesLib;
 import dev.shadowsoffire.attributeslib.api.IFormattableAttribute;
 import java.util.*;
@@ -137,10 +138,11 @@ public class ApothicCuriosMod {
   }
 
   private void removeTooltip(ItemTooltipEvent event, GemInstance gem, ItemStack stack) {
-    Optional<GemBonus> bonus = gem.gem().get().getBonus(LootCategory.forItem(stack));
+    LootRarity rarity = gem.rarity().get();
+    Optional<GemBonus> bonus = gem.gem().get().getBonus(LootCategory.forItem(stack), rarity);
     if (bonus.isEmpty()) return;
     getGemModifiersTooltips(gem, bonus.get()).forEach(c -> removeTooltip(event, c));
-    removeTooltip(event, bonus.get().getSocketBonusTooltip(gem.gemStack(), gem.rarity().get()));
+    removeTooltip(event, bonus.get().getSocketBonusTooltip(gem.gemStack(), rarity));
   }
 
   private static List<Component> getGemModifiersTooltips(GemInstance gem, GemBonus bonus) {
