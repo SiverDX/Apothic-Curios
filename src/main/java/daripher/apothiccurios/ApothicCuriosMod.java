@@ -5,12 +5,12 @@ import com.mojang.datafixers.util.Either;
 import dev.shadowsoffire.apotheosis.Apotheosis;
 import dev.shadowsoffire.apotheosis.adventure.affix.AffixHelper;
 import dev.shadowsoffire.apotheosis.adventure.affix.AffixInstance;
-import dev.shadowsoffire.apotheosis.adventure.affix.socket.SocketHelper;
-import dev.shadowsoffire.apotheosis.adventure.affix.socket.gem.GemInstance;
-import dev.shadowsoffire.apotheosis.adventure.affix.socket.gem.bonus.GemBonus;
 import dev.shadowsoffire.apotheosis.adventure.client.SocketTooltipRenderer;
 import dev.shadowsoffire.apotheosis.adventure.loot.LootCategory;
 import dev.shadowsoffire.apotheosis.adventure.loot.LootRarity;
+import dev.shadowsoffire.apotheosis.adventure.socket.SocketHelper;
+import dev.shadowsoffire.apotheosis.adventure.socket.gem.GemInstance;
+import dev.shadowsoffire.apotheosis.adventure.socket.gem.bonus.GemBonus;
 import dev.shadowsoffire.attributeslib.AttributesLib;
 import dev.shadowsoffire.attributeslib.api.IFormattableAttribute;
 import java.util.*;
@@ -134,10 +134,11 @@ public class ApothicCuriosMod {
     ItemStack stack = event.getItemStack();
     if (!stack.hasTag()) return;
     if (isNonCurio(stack)) return;
-    SocketHelper.getGemInstances(stack).forEach(g -> removeTooltip(event, g, stack));
+    SocketHelper.getGems(stack).forEach(g -> removeTooltip(event, g, stack));
   }
 
   private void removeTooltip(ItemTooltipEvent event, GemInstance gem, ItemStack stack) {
+    if (!gem.rarity().isBound()) return;
     LootRarity rarity = gem.rarity().get();
     Optional<GemBonus> bonus = gem.gem().get().getBonus(LootCategory.forItem(stack), rarity);
     if (bonus.isEmpty()) return;
